@@ -1,15 +1,16 @@
 <template>
-  <div>
-    <h2>Minhas Tarefas</h2>
+  <div class="task-container">
+    <h2 class="title">Gerenciador de Tarefas</h2>
     <TaskForm v-if="showForm" :id="selectedTaskId" @task-saved="fetchTasks" />
-    <ul>
-      <li v-for="task in tasks" :key="task.taskId">
-        {{ task.title }} - {{ task.description }}
-        <button @click="editTask(task.taskId)">Editar</button>
-        <button @click="deleteTask(task.taskId)">Excluir</button>
+    <ul class="task-list" v-if="tasks.length">
+      <li v-for="task in tasks" :key="task.taskId" class="task-item">
+        <span class="task-title">{{ task.title }}</span>
+        <span class="task-description">{{ task.description }}</span>
+        <button @click="editTask(task.taskId)" class="edit-btn">Editar</button>
+        <button @click="deleteTask(task.taskId)" class="delete-btn">Excluir</button>
       </li>
     </ul>
-    <button @click="createTask">Nova Tarefa</button>
+    <button @click="createTask" class="new-task-btn">Nova Tarefa</button>
   </div>
 </template>
 
@@ -78,3 +79,152 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+.task-container {
+  max-width: 800px;
+  margin: 18rem auto;
+  padding: 2rem;
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+.title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #40e0d0;
+  text-align: center;
+  margin-bottom: 2rem;
+  letter-spacing: -0.025em;
+}
+
+.task-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1.5rem 0;
+}
+
+.task-item {
+  display: flex;
+  align-items: center;
+  background-color: #f5f5f5;
+  padding: 1.25rem;
+  margin-bottom: 1rem;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  transition: box-shadow 0.3s ease, transform 0.2s ease;
+}
+
+.task-item:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+.task-title {
+  flex: 1;
+  font-size: 1.65rem;
+  font-weight: 600;
+  color: #006666;
+  margin-right: 2rem;
+}
+
+.task-description {
+  flex: 2;
+  font-size: 1.45rem;
+  color: #008080;
+  line-height: 1.5;
+  margin-right: 1rem;
+}
+
+.task-actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.edit-btn {
+  background-color: #78bcc0;
+  margin-left: 25px;
+  color: white;
+  border: none;
+  padding: 0.8rem 1.25rem;
+  border-radius: 6px;
+  font-size: 1.32rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.edit-btn:hover {
+  background-color: #40e0d0;
+  transform: translateY(-1px);
+}
+
+.edit-btn:active {
+  transform: translateY(0);
+}
+
+.delete-btn {
+  background-color: #008080;
+  margin-left: 5px;
+  color: white;
+  border: none;
+  padding: 0.8rem 1.25rem;
+  border-radius: 6px;
+  font-size: 1.33rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.delete-btn:hover {
+  background-color: #c53030;
+  transform: translateY(-1px);
+}
+
+.delete-btn:active {
+  transform: translateY(0);
+}
+
+.new-task-btn {
+  display: block;
+  width: 150px;
+  margin: 3rem auto;
+  padding: 0.875rem;
+  background-color: #40e0d0;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 1.7rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.new-task-btn:hover {
+  background-color: #38a169;
+  transform: translateY(-1px);
+}
+
+.new-task-btn:active {
+  transform: translateY(0);
+}
+
+.error-message {
+  background-color: #fef2f2;
+  color: #dc2626;
+  padding: 1rem;
+  border-radius: 6px;
+  margin: 1rem 0;
+  text-align: center;
+  font-size: 0.95rem;
+}
+
+.no-tasks {
+  text-align: center;
+  color: #718096;
+  font-size: 1.1rem;
+  margin-top: 2rem;
+  font-style: italic;
+}
+</style>
