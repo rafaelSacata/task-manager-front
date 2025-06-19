@@ -4,9 +4,9 @@
     <TaskForm v-if="showForm" :id="selectedTaskId" @task-saved="fetchTasks" />
     <ul class="task-list" v-if="tasks.length">
       <li v-for="task in tasks" :key="task.taskId" class="task-item">
-        <span class="task-title">{{ task.title }}</span>
-        <span class="task-description">{{ task.description }}</span>
-        <button @click="editTask(task.taskId)" class="edit-btn">Editar</button>
+        <span class="task-title" :class="{ 'completed-task': task.completed }">{{ task.title }}</span>
+        <span class="task-description" :class="{ 'completed-task': task.completed }">{{ task.description }}</span>
+        <button @click="completeTask(task.taskId)" class="complete-btn" :class="{ 'completed': task.completed }">Concluir</button>
         <button @click="deleteTask(task.taskId)" class="delete-btn">Excluir</button>
       </li>
     </ul>
@@ -50,9 +50,23 @@ export default {
         }
       }
     },
-    editTask(id) {
-      this.selectedTaskId = id;
-      this.showForm = true;
+    async completeTask(taskId) {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          this.$router.push('/login');
+          return;
+        }
+        await axios.put(`http://localhost:8080/tasks/${taskId}`, { completed: true }, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        this.fetchTasks(); // Recarrega a lista para refletir o status atualizado
+      } catch (error) {
+        console.error('Erro ao concluir tarefa', error);
+        if (error.response && error.response.status === 401) {
+          this.$router.push('/login');
+        }
+      }
     },
     async deleteTask(id) {
       try {
@@ -142,7 +156,7 @@ export default {
   gap: 0.75rem;
 }
 
-.edit-btn {
+.complete-btn {
   background-color: #78bcc0;
   margin-left: 25px;
   color: white;
@@ -155,12 +169,12 @@ export default {
   transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
-.edit-btn:hover {
+.complete-btn:hover {
   background-color: #40e0d0;
   transform: translateY(-1px);
 }
 
-.edit-btn:active {
+.complete-btn:active {
   transform: translateY(0);
 }
 
@@ -226,5 +240,14 @@ export default {
   font-size: 1.1rem;
   margin-top: 2rem;
   font-style: italic;
+}
+
+.completed-task {
+  text-decoration: line-through;
+  color: #718096;
+}
+
+.completed {
+    display: none;
 }
 </style>
