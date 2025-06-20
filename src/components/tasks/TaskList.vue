@@ -1,7 +1,7 @@
 <template>
   <div class="task-container">
     <h2 class="title">Gerenciador de Tarefas</h2>
-    <TaskForm v-if="showForm" :id="selectedTaskId" @task-saved="fetchTasks" />
+    <TaskForm v-if="showForm" :id="selectedTaskId" @task-saved="fetchTasks" @task-canceled="closeForm" />
     <ul class="task-list" v-if="tasks.length">
       <li v-for="task in tasks" :key="task.taskId" class="task-item">
         <span class="task-title" :class="{ 'completed-task': task.completed }">{{ task.title }}</span>
@@ -41,7 +41,11 @@ export default {
         const response = await axios.get('http://localhost:8080/tasks', {
           headers: { Authorization: `Bearer ${token}` },
         });
-        this.tasks = response.data;
+        this.tasks = response.data.sort((a, b) => {
+          if (a.createdAt && b.createdAt) {
+            return new Date(b.createdAt) - new Date(a.createdAt);
+          }
+        });
         this.showForm = false;
       } catch (error) {
         console.error('Erro ao buscar tarefas', error);
@@ -60,7 +64,7 @@ export default {
         await axios.put(`http://localhost:8080/tasks/${taskId}`, { completed: true }, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        this.fetchTasks(); // Recarrega a lista para refletir o status atualizado
+        this.fetchTasks();
       } catch (error) {
         console.error('Erro ao concluir tarefa', error);
         if (error.response && error.response.status === 401) {
@@ -89,6 +93,9 @@ export default {
     createTask() {
       this.selectedTaskId = null;
       this.showForm = true;
+    },
+    closeForm() {
+      this.showForm = false;
     },
   },
 };
@@ -248,6 +255,6 @@ export default {
 }
 
 .completed {
-    display: none;
+  display: none;
 }
 </style>
