@@ -37,7 +37,7 @@ export default {
           this.$router.push('/login');
           return;
         }
-        const response = await axios.get(`http://localhost:8080/tasks/${this.id}`, {
+        const response = await axios.get(`https://task-manager-api.onrender.com/tasks/${this.id}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         this.task = response.data;
@@ -56,11 +56,11 @@ export default {
           return;
         }
         if (this.isEdit) {
-          await axios.put(`http://localhost:8080/tasks/${this.id}`, this.task, {
+          await axios.put(`https://task-manager-api.onrender.com/tasks/${this.id}`, this.task, {
             headers: { Authorization: `Bearer ${token}` },
           });
         } else {
-          await axios.post('http://localhost:8080/tasks', this.task, {
+          await axios.post('https://task-manager-api.onrender.com/tasks', this.task, {
             headers: { Authorization: `Bearer ${token}` },
           });
         }
