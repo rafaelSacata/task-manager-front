@@ -1,13 +1,13 @@
 <template>
     <div class="login-container">
-        <h2 class="title">Login</h2>
-        <form @submit.prevent="login" class="login-form">
+        <h2 class="title">Registro</h2>
+        <form @submit.prevent="register" class="login-form">
+            <input v-model="name" type="text" placeholder="Nome de Usuário" class="input-field" required />
             <input v-model="email" type="email" placeholder="Email" class="input-field" required />
             <input v-model="password" type="password" placeholder="Senha" class="input-field" required />
             <div v-if="errorMessage" class="error-message">{{ errorMessage }}</div>
-            <button type="submit" class="submit-btn">Entrar</button>
+            <button type="submit" class="submit-btn">Registrar</button>
         </form>
-        <p class="register-link">Não tem uma conta? <router-link to="/register">Registre-se</router-link></p>
     </div>
 </template>
 
@@ -17,25 +17,31 @@ import axios from 'axios';
 export default {
     data() {
         return {
+            name: '',
             email: '',
             password: '',
             errorMessage: '',
         };
     },
     methods: {
-        async login() {
+        async register() {
             try {
                 this.errorMessage = '';
-                const response = await axios.post('https://task-manager-application-s6rm.onrender.com/auth/login', {
+                const response = await axios.post('https://task-manager-application-s6rm.onrender.com/auth/register', {
+                    name: this.name,
                     email: this.email,
                     password: this.password,
                 });
                 const token = response.data.token;
-                localStorage.setItem('token', token);
-                this.$router.push('/tasks');
+                if (token) {
+                    localStorage.setItem('token', token);
+                    this.$router.push('/tasks');
+                } else {
+                    this.$router.push('/login');
+                }
             } catch (error) {
-                console.error('Erro ao fazer login', error);
-                this.errorMessage = error.response?.data?.message || 'Erro ao fazer login. Tente novamente.';
+                console.error('Erro ao registrar', error);
+                this.errorMessage = error.response?.data?.message || 'Erro ao registrar. Tente novamente.';
             }
         },
     },
@@ -115,22 +121,5 @@ export default {
     border-radius: 6px;
     text-align: center;
     font-size: 1.2rem;
-}
-
-.register-link {
-    text-align: center;
-    margin-top: 1rem;
-    font-size: 1.2rem;
-    color: #2d3748;
-}
-
-.register-link a {
-    color: #40e0d0;
-    text-decoration: none;
-    font-weight: 500;
-}
-
-.register-link a:hover {
-    text-decoration: underline;
 }
 </style>

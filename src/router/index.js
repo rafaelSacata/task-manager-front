@@ -1,9 +1,11 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import LoginForm from '@/components/auth/LoginForm.vue';
 import TaskList from '@/components/tasks/TaskList.vue';
+import SignOn from '@/components/auth/SignOn.vue';
 
 const routes = [
   { path: '/', redirect: '/login' },
+  { path: '/register', component: SignOn },
   { path: '/login', component: LoginForm },
   { path: '/tasks', component: TaskList, meta: { requiresAuth: true } },
 ];
