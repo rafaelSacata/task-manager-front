@@ -38,7 +38,7 @@ export default {
           this.$router.push('/login');
           return;
         }
-        const response = await axios.get('https://task-manager-api.onrender.com/tasks', {
+        const response = await axios.get('https://task-manager-application-s6rm.onrender.com/tasks', {
           headers: { Authorization: `Bearer ${token}` },
         });
         this.tasks = response.data.sort((a, b) => {
@@ -61,7 +61,7 @@ export default {
           this.$router.push('/login');
           return;
         }
-        await axios.put(`https://task-manager-api.onrender.com/tasks/${taskId}`, { completed: true }, {
+        await axios.put(`https://task-manager-application-s6rm.onrender.com/tasks/${taskId}`, { completed: true }, {
           headers: { Authorization: `Bearer ${token}` },
         });
         this.fetchTasks();
@@ -79,7 +79,7 @@ export default {
           this.$router.push('/login');
           return;
         }
-        await axios.delete(`https://task-manager-api.onrender.com/tasks/${id}`, {
+        await axios.delete(`https://task-manager-application-s6rm.onrender.com/tasks/${id}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         this.fetchTasks();

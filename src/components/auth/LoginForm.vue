@@ -22,7 +22,7 @@ export default {
     methods: {
         async login() {
             try {
-                const response = await axios.post('/api/auth/login', {
+                const response = await axios.post('https://task-manager-application-s6rm.onrender.com/auth/login', {
                     email: this.email,
                     password: this.password,
                 });
