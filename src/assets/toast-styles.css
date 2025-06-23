@@ -1,0 +1,23 @@
+.Vue-Toastification__toast--info {
+  background-color: #40e0d0 !important;
+  color: #ffffff !important;
+  border: 1px solid #f0f4fa !important;
+  border-radius: 8px !important;
+  font-family: 'Avenir', Helvetica, Arial, sans-serif !important;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1) !important;
+}
+
+.Vue-Toastification__toast--success {
+  background-color: #78bcc0 !important;
+  color: #ffffff !important;
+}
+
+.Vue-Toastification__toast--error {
+  background-color: #d32f2f !important;
+  color: #ffffff !important;
+}
+
+.Vue-Toastification__toast--warning {
+  background-color: #f57c00 !important;
+  color: #ffffff !important;
+}

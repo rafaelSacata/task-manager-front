@@ -27,7 +27,7 @@ export default {
         async register() {
             try {
                 this.errorMessage = '';
-                const response = await axios.post('https://task-manager-application-s6rm.onrender.com/auth/register', {
+                const response = await axios.post(`${process.env.VUE_APP_API_URL}/auth/register`, {
                     name: this.name,
                     email: this.email,
                     password: this.password,

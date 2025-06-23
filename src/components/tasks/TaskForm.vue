@@ -1,9 +1,29 @@
 <template>
   <div class="task-form-container">
-    <h2 class="title">{{ 'Nova Tarefa' }}</h2>
+    <h2 class="title">{{ isEdit ? 'Editar Tarefa' : 'Nova Tarefa' }}</h2>
     <form @submit.prevent="saveTask" class="task-form">
       <input v-model="task.title" placeholder="Título" class="input-field" required />
       <textarea v-model="task.description" placeholder="Descrição" class="input-field textarea-field" required></textarea>
+      <div class="checkbox-group">
+        <label class="checkbox-label">
+          <input type="checkbox" v-model="task.hasReminders" />
+          Adicionar um lembrete?
+        </label>
+      </div>
+      <div v-show="task.hasReminders" class="reminder-interval-group">
+        <p class="interval-title">Frequência do lembrete:</p>
+        <div v-for="interval in reminderIntervals" :key="interval.value" class="checkbox-label">
+          <input
+            type="checkbox"
+            :value="interval.value"
+            v-model="selectedInterval"
+            @change="updateReminderInterval(interval.value)"
+            :checked="task.reminderInterval === interval.value"
+          />
+          {{ interval.label }}
+        </div>
+        <p v-if="showIntervalError" class="error-message">Selecione uma frequência de lembrete.</p>
+      </div>
       <div class="button-group">
         <button type="button" @click="cancel" class="cancel-btn">Cancelar</button>
         <button type="submit" class="submit-btn">{{ isEdit ? 'Salvar' : 'Criar' }}</button>
@@ -14,16 +34,32 @@
 
 <script>
 import axios from 'axios';
+import { useToast } from 'vue-toastification';
 
 export default {
   props: ['id'],
   data() {
     return {
-      task: { title: '', description: '' },
+      task: {
+        title: '',
+        description: '',
+        hasReminders: false,
+        reminderInterval: null,
+      },
+      selectedInterval: [],
       isEdit: false,
+      toast: null,
+      reminderIntervals: [
+        { value: 'EVERY_5_MINUTES', label: 'A cada 5 minutos' },
+        { value: 'HOURLY', label: 'A cada hora' },
+        { value: 'DAILY', label: 'Diariamente' },
+        { value: 'WEEKLY', label: 'Semanalmente' },
+      ],
+      showIntervalError: false,
     };
   },
   mounted() {
+    this.toast = useToast();
     if (this.id) {
       this.isEdit = true;
       this.fetchTask();
@@ -37,18 +73,42 @@ export default {
           this.$router.push('/login');
           return;
         }
-        const response = await axios.get(`https://task-manager-application-s6rm.onrender.com/tasks/${this.id}`, {
+        const response = await axios.get(`${process.env.VUE_APP_API_URL}/tasks/${this.id}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        this.task = response.data;
+        this.task = {
+          title: response.data.title,
+          description: response.data.description,
+          hasReminders: response.data.hasReminders,
+          reminderInterval: response.data.reminderInterval,
+        };
+        if (this.task.hasReminders && this.task.reminderInterval) {
+          this.selectedInterval = [this.task.reminderInterval];
+        }
       } catch (error) {
         console.error('Erro ao buscar tarefa', error);
-        if (error.response && error.response.status === 401) {
+        if (error.response?.status === 401) {
           this.$router.push('/login');
+        } else {
+          this.toast.error('Erro ao carregar a tarefa.');
         }
       }
     },
+    updateReminderInterval(value) {
+      this.selectedInterval = [value];
+      this.task.reminderInterval = value;
+      this.showIntervalError = false;
+    },
     async saveTask() {
+      if (this.task.hasReminders && !this.task.reminderInterval) {
+        this.showIntervalError = true;
+        this.toast.error('Selecione uma frequência de lembrete.');
+        return;
+      }
+      if (!this.task.hasReminders) {
+        this.task.reminderInterval = null;
+        this.selectedInterval = [];
+      }
       try {
         const token = localStorage.getItem('token');
         if (!token) {
@@ -56,19 +116,44 @@ export default {
           return;
         }
         if (this.isEdit) {
-          await axios.put(`https://task-manager-application-s6rm.onrender.com/tasks/${this.id}`, this.task, {
+          await axios.patch(`${process.env.VUE_APP_API_URL}/tasks/${this.id}`, this.task, {
             headers: { Authorization: `Bearer ${token}` },
           });
+          this.toast.success('Tarefa atualizada com sucesso!');
         } else {
-          await axios.post('https://task-manager-application-s6rm.onrender.com/tasks', this.task, {
+          await axios.post(`${process.env.VUE_APP_API_URL}/tasks`, this.task, {
             headers: { Authorization: `Bearer ${token}` },
           });
+          this.toast.success('Tarefa criada com sucesso!');
         }
         this.$emit('task-saved');
       } catch (error) {
         console.error('Erro ao salvar tarefa', error);
-        if (error.response && error.response.status === 401) {
+        if (error.response?.status === 401) {
           this.$router.push('/login');
+        } else {
+          this.toast.error('Erro ao salvar a tarefa.');
+        }
+      }
+    },
+    async deleteTask() {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          this.$router.push('/login');
+          return;
+        }
+        await axios.delete(`${process.env.VUE_APP_API_URL}/tasks/${this.id}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        this.toast.success('Tarefa deletada com sucesso!');
+        this.$emit('task-deleted');
+      } catch (error) {
+        console.error('Erro ao deletar tarefa', error);
+        if (error.response?.status === 401) {
+          this.$router.push('/login');
+        } else {
+          this.toast.error('Erro ao deletar a tarefa.');
         }
       }
     },
@@ -127,14 +212,56 @@ export default {
   min-height: 100px;
 }
 
+.checkbox-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.reminder-interval-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  padding-left: 1.5rem;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.2rem;
+  color: #2d3748;
+}
+
+.checkbox-label input[type="checkbox"] {
+  width: 1.2rem;
+  height: 1.2rem;
+  accent-color: #40e0d0;
+}
+
+.interval-title {
+  font-size: 1.2rem;
+  font-weight: 500;
+  color: #2d3748;
+}
+
+.error-message {
+  color: #d32f2f;
+  font-size: 1rem;
+  margin-top: 0.5rem;
+}
+
 .button-group {
   display: flex;
   gap: 1rem;
   justify-content: flex-end;
+  margin-top: 1rem;
 }
 
 .submit-btn {
-    width: 80px;
+  width: 80px;
   padding: 0.875rem;
   background-color: #40e0d0;
   color: white;
@@ -156,7 +283,7 @@ export default {
 }
 
 .cancel-btn {
-    width: 80px;
+  width: 80px;
   padding: 0.875rem;
   background-color: #a0aec0;
   color: white;

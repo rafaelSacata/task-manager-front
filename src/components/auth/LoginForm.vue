@@ -26,7 +26,7 @@ export default {
         async login() {
             try {
                 this.errorMessage = '';
-                const response = await axios.post('https://task-manager-application-s6rm.onrender.com/auth/login', {
+                const response = await axios.post(`${process.env.VUE_APP_API_URL}/auth/login`, {
                     email: this.email,
                     password: this.password,
                 });

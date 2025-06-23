@@ -1,6 +1,33 @@
 <template>
-  <router-view/>
+  <router-view />
 </template>
+
+<script>
+
+import { useToast } from 'vue-toastification';
+import ReminderService from './services/ReminverService';
+
+export default {
+  name: 'App',
+  setup() {
+    const toast = useToast();
+
+    const checkReminders = async () => {
+      const reminders = await ReminderService.getPendingReminders();
+      reminders.forEach((task) => {
+        toast.info(`Lembrete: ${task.title}\n${task.description}`, {
+          timeout: 5000,
+        });
+      });
+    };
+
+    setInterval(checkReminders, 60000);
+    checkReminders();
+
+    return {};
+  },
+};
+</script>
 
 <style>
 #app {
