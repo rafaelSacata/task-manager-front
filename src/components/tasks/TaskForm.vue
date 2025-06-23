@@ -51,9 +51,10 @@ export default {
       toast: null,
       reminderIntervals: [
         { value: 'EVERY_5_MINUTES', label: 'A cada 5 minutos' },
+        { value: 'EVERY_15_MINUTES', label: 'A cada 15 minutos' },
+        { value: 'EVERY_30_MINUTES', label: 'A cada 30 minutos' },
         { value: 'HOURLY', label: 'A cada hora' },
         { value: 'DAILY', label: 'Diariamente' },
-        { value: 'WEEKLY', label: 'Semanalmente' },
       ],
       showIntervalError: false,
     };
